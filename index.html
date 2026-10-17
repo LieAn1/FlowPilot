@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlowPilot - AI 工作流工作台（演示版）</title>
+    <title>FlowPilot - Premium AI Multi-Agent Research Workspace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -11,503 +14,1297 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --mouse-x: 50%;
+            --mouse-y: 50%;
+
+            /* Premium color system */
+            --background: #050506;
+            --background-elevated: #0b0b0e;
+            --foreground: #f4f4f5;
+            --foreground-muted: rgba(244, 244, 245, 0.62);
+            --foreground-subtle: rgba(244, 244, 245, 0.36);
+
+            --accent: #a8a6ff;
+            --accent-secondary: #8c9cff;
+            --accent-soft: rgba(168, 166, 255, 0.12);
+
+            --border-subtle: rgba(255, 255, 255, 0.10);
+            --glass-bg: rgba(255, 255, 255, 0.035);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-blur: 18px;
+
+            --radius-control: 16px;
+            --radius-panel: 24px;
+
+            --success-green: #3fb950;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
-            background: #0d1117;
-            color: #c9d1d9;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--background);
+            color: var(--foreground-muted);
             line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        /* Advanced cursor-driven light field */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                800px circle at var(--mouse-x) var(--mouse-y),
+                rgba(168, 166, 255, 0.06),
+                transparent 50%
+            );
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.6s ease;
         }
 
-        /* 顶部导航栏 */
+        body.cursor-active::before {
+            opacity: 1;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Floating navigation */
         .navbar {
-            background: #161b22;
-            border-bottom: 1px solid #30363d;
-            padding: 16px 0;
-            margin-bottom: 30px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 0;
         }
 
         .navbar-content {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-control);
+            backdrop-filter: blur(var(--glass-blur));
+            padding: 16px 28px;
         }
 
         .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #58a6ff;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--foreground);
+            letter-spacing: -0.02em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--foreground-subtle);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--foreground);
         }
 
         .demo-badge {
-            background: #1f6feb;
-            color: #fff;
-            padding: 4px 12px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            padding: 6px 14px;
             border-radius: 12px;
             font-size: 12px;
-            font-weight: 500;
+            font-weight: 600;
+            border: 1px solid rgba(168, 166, 255, 0.2);
         }
 
-        /* 任务输入区域 */
-        .input-section {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            padding: 24px;
-            margin-bottom: 30px;
+        /* Hero section - cinematic typography */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 120px 40px 80px;
+            overflow: hidden;
         }
 
-        .input-section h2 {
-            margin-bottom: 16px;
-            color: #f0f6fc;
+        .hero-canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        #heroCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 1200px;
+        }
+
+        /* Multi-layered animated typography */
+        .hero-headline {
+            position: relative;
+            margin-bottom: 32px;
+        }
+
+        .headline-layer {
+            font-size: clamp(48px, 10vw, 120px);
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 0.9;
+            text-transform: uppercase;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            width: max-content;
+        }
+
+        .headline-layer.base {
+            position: relative;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(244, 244, 245, 0.1);
+        }
+
+        .headline-layer.glow-1 {
+            color: var(--foreground);
+            opacity: 0.9;
+            filter: blur(0px);
+            animation: wave-distort-1 8s ease-in-out infinite;
+            text-shadow: 0 0 60px rgba(168, 166, 255, 0.4);
+        }
+
+        .headline-layer.glow-2 {
+            color: rgba(168, 166, 255, 0.6);
+            opacity: 0.6;
+            filter: blur(2px);
+            animation: wave-distort-2 6s ease-in-out infinite;
+        }
+
+        .headline-layer.scan {
+            color: var(--accent);
+            opacity: 0;
+            filter: blur(0px);
+            animation: scan-reveal 4s ease-in-out infinite;
+            clip-path: polygon(0 0, 100% 0, 100% 20%, 0 20%);
+        }
+
+        .headline-layer.rgb-shift {
+            color: var(--foreground);
+            opacity: 0.3;
+            filter: blur(1px);
+            animation: rgb-shift 3s ease-in-out infinite;
+        }
+
+        /* Continuous motion animations */
+        @keyframes wave-distort-1 {
+            0%, 100% {
+                transform: translateX(-50%) translateY(0) scaleX(1);
+                filter: blur(0px);
+            }
+            25% {
+                transform: translateX(-50%) translateY(-2px) scaleX(1.005);
+                filter: blur(0.5px);
+            }
+            50% {
+                transform: translateX(-50%) translateY(0) scaleX(1);
+                filter: blur(0px);
+            }
+            75% {
+                transform: translateX(-50%) translateY(2px) scaleX(0.998);
+                filter: blur(0.3px);
+            }
+        }
+
+        @keyframes wave-distort-2 {
+            0%, 100% {
+                transform: translateX(-50%) translateY(0) scaleY(1);
+                opacity: 0.6;
+            }
+            33% {
+                transform: translateX(-50%) translateY(3px) scaleY(1.01);
+                opacity: 0.8;
+            }
+            66% {
+                transform: translateX(-50%) translateY(-3px) scaleY(0.99);
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes scan-reveal {
+            0% {
+                clip-path: polygon(0 0, 100% 0, 100% 0%, 0 0%);
+                opacity: 0;
+            }
+            15% {
+                opacity: 1;
+            }
+            50% {
+                clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+                opacity: 0.8;
+            }
+            65% {
+                opacity: 0;
+            }
+            100% {
+                clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%);
+                opacity: 0;
+            }
+        }
+
+        @keyframes rgb-shift {
+            0%, 100% {
+                transform: translateX(-50%) translate(0, 0);
+                text-shadow:
+                    2px 0 0 rgba(255, 0, 100, 0.3),
+                    -2px 0 0 rgba(0, 200, 255, 0.3);
+            }
+            50% {
+                transform: translateX(-50%) translate(1px, -1px);
+                text-shadow:
+                    3px 0 0 rgba(255, 0, 100, 0.4),
+                    -3px 0 0 rgba(0, 200, 255, 0.4);
+            }
+        }
+
+        .hero-subtitle {
+            font-size: 16px;
+            color: var(--foreground-subtle);
+            margin-bottom: 60px;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+            animation: fadeInUp 1s ease 0.3s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Premium task input panel */
+        .task-panel {
+            position: relative;
+            width: 100%;
+            max-width: 680px;
+            margin: 0 auto;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-panel);
+            backdrop-filter: blur(var(--glass-blur));
+            padding: 32px;
+            animation: fadeInUp 1s ease 0.5s both;
+        }
+
+        .task-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .task-panel:focus-within::before {
+            opacity: 1;
+        }
+
+        .task-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--foreground-subtle);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
         }
 
         .task-input {
             width: 100%;
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 12px;
-            color: #c9d1d9;
-            font-size: 14px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-control);
+            padding: 16px;
+            color: var(--foreground);
+            font-size: 15px;
             font-family: inherit;
             resize: vertical;
-            min-height: 80px;
-            margin-bottom: 16px;
+            min-height: 120px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            line-height: 1.6;
         }
 
         .task-input:focus {
             outline: none;
-            border-color: #58a6ff;
+            border-color: var(--accent);
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 0 1px var(--accent-soft);
+        }
+
+        .task-input::placeholder {
+            color: var(--foreground-subtle);
+        }
+
+        .task-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .btn-start {
-            background: #238636;
-            color: #fff;
+            background: var(--foreground);
+            color: var(--background);
             border: none;
-            padding: 10px 24px;
-            border-radius: 6px;
+            padding: 14px 32px;
+            border-radius: var(--radius-control);
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-start::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-start:hover:not(:disabled)::before {
+            width: 300px;
+            height: 300px;
         }
 
         .btn-start:hover:not(:disabled) {
-            background: #2ea043;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(244, 244, 245, 0.2);
         }
 
         .btn-start:disabled {
-            background: #21262d;
-            color: #8b949e;
+            background: var(--border-subtle);
+            color: var(--foreground-subtle);
             cursor: not-allowed;
         }
 
+        .task-hint {
+            font-size: 12px;
+            color: var(--foreground-subtle);
+        }
+
         .warning-text {
-            color: #f85149;
+            color: #ff6b6b;
             font-size: 13px;
-            margin-top: 8px;
+            margin-top: 12px;
             display: none;
         }
 
-        .info-text {
-            color: #8b949e;
-            font-size: 13px;
-            margin-top: 8px;
+        .demo-note {
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: var(--accent-soft);
+            border: 1px solid rgba(168, 166, 255, 0.2);
+            border-radius: 12px;
+            font-size: 12px;
+            color: var(--accent);
+            text-align: center;
         }
 
-        /* Agent 状态卡片 */
-        .agents-section {
-            margin-bottom: 30px;
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0.5;
+            animation: scroll-bounce 2s ease-in-out infinite;
         }
 
-        .agents-section h2 {
-            margin-bottom: 16px;
-            color: #f0f6fc;
+        @keyframes scroll-bounce {
+            0%, 100% { transform: translate(-50%, 0); }
+            50% { transform: translate(-50%, 10px); }
         }
 
-        .agents-grid {
+        .scroll-indicator svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--foreground-subtle);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        /* Workflow section */
+        .workflow-section {
+            min-height: 100vh;
+            padding: 120px 40px;
+            position: relative;
+        }
+
+        .workflow-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--foreground-subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 48px;
+            text-align: center;
+        }
+
+        /* Agent process visualization */
+        .agents-flow {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
         }
 
         .agent-card {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            padding: 20px;
-            transition: border-color 0.3s;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-panel);
+            backdrop-filter: blur(var(--glass-blur));
+            padding: 32px;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .agent-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, var(--accent-soft), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s;
+            border-radius: var(--radius-panel);
+        }
+
+        .agent-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(168, 166, 255, 0.3);
         }
 
         .agent-card.active {
-            border-color: #58a6ff;
+            border-color: var(--accent);
+            box-shadow: 0 0 40px rgba(168, 166, 255, 0.15);
+        }
+
+        .agent-card.active::before {
+            opacity: 1;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
         }
 
         .agent-card.completed {
-            border-color: #3fb950;
+            border-color: var(--success-green);
         }
 
         .agent-header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            margin-bottom: 12px;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .agent-info {
+            flex: 1;
         }
 
         .agent-name {
-            font-weight: 600;
-            font-size: 16px;
-            color: #f0f6fc;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--foreground);
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .agent-status {
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 4px;
+        .agent-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border-subtle);
+            transition: all 0.3s;
+        }
+
+        .agent-card.active .agent-indicator {
+            background: var(--accent);
+            box-shadow: 0 0 12px var(--accent);
+            animation: indicator-pulse 1.5s ease-in-out infinite;
+        }
+
+        .agent-card.completed .agent-indicator {
+            background: var(--success-green);
+        }
+
+        @keyframes indicator-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.7; }
+        }
+
+        .agent-role {
+            font-size: 13px;
+            color: var(--foreground-subtle);
             font-weight: 500;
         }
 
+        .agent-status {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
         .status-idle {
-            background: #21262d;
-            color: #8b949e;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--foreground-subtle);
         }
 
         .status-running {
-            background: #1f6feb;
-            color: #fff;
+            background: var(--accent-soft);
+            color: var(--accent);
+            border: 1px solid rgba(168, 166, 255, 0.3);
+            box-shadow: 0 0 12px rgba(168, 166, 255, 0.2);
         }
 
         .status-completed {
-            background: #238636;
-            color: #fff;
+            background: rgba(63, 185, 80, 0.15);
+            color: var(--success-green);
         }
 
         .agent-description {
-            color: #8b949e;
-            font-size: 13px;
-            margin-bottom: 12px;
+            color: var(--foreground-muted);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
         }
 
         .agent-progress {
-            color: #58a6ff;
+            color: var(--accent);
             font-size: 13px;
+            font-weight: 500;
+            min-height: 20px;
+            position: relative;
+            z-index: 1;
         }
 
-        /* 进度区域 */
+        /* Activity timeline */
+        .activity-timeline {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-panel);
+            backdrop-filter: blur(var(--glass-blur));
+            padding: 32px;
+            margin-bottom: 60px;
+            display: none;
+        }
+
+        .activity-timeline.visible {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .activity-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--foreground);
+            margin-bottom: 24px;
+        }
+
+        .timeline-content {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .timeline-event {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 0;
+            border-left: 2px solid var(--border-subtle);
+            padding-left: 20px;
+            opacity: 0;
+            animation: slideInLeft 0.4s ease forwards;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .event-time {
+            font-size: 12px;
+            color: var(--foreground-subtle);
+            min-width: 60px;
+        }
+
+        .event-text {
+            font-size: 14px;
+            color: var(--foreground-muted);
+        }
+
+        /* Progress bar */
         .progress-section {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            padding: 24px;
-            margin-bottom: 30px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-panel);
+            backdrop-filter: blur(var(--glass-blur));
+            padding: 32px;
+            margin-bottom: 60px;
             display: none;
         }
 
         .progress-section.visible {
             display: block;
+            animation: fadeInUp 0.5s ease;
         }
 
-        .progress-section h2 {
-            margin-bottom: 16px;
-            color: #f0f6fc;
+        .progress-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--foreground);
+            margin-bottom: 20px;
         }
 
         .progress-bar-container {
-            background: #0d1117;
-            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
             height: 8px;
-            margin-bottom: 16px;
             overflow: hidden;
+            margin-bottom: 16px;
+            position: relative;
         }
 
         .progress-bar {
-            background: linear-gradient(90deg, #1f6feb 0%, #58a6ff 100%);
+            background: linear-gradient(90deg, var(--accent-secondary), var(--accent));
             height: 100%;
             width: 0%;
-            transition: width 0.3s;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border-radius: 12px;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         .current-step {
-            color: #c9d1d9;
             font-size: 14px;
-            padding: 12px;
-            background: #0d1117;
-            border-radius: 6px;
-            border-left: 3px solid #58a6ff;
+            color: var(--foreground-muted);
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border-left: 3px solid var(--accent);
         }
 
-        /* 报告区域 */
+        /* Report section */
         .report-section {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            padding: 24px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-panel);
+            backdrop-filter: blur(var(--glass-blur));
+            padding: 40px;
             display: none;
         }
 
         .report-section.visible {
             display: block;
+            animation: fadeInUp 0.6s ease;
         }
 
-        .report-section h2 {
-            margin-bottom: 16px;
-            color: #f0f6fc;
+        .report-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--foreground);
+            margin-bottom: 32px;
+            letter-spacing: -0.02em;
         }
 
         .report-content {
-            background: #0d1117;
-            border-radius: 6px;
-            padding: 16px;
-            color: #c9d1d9;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--radius-control);
+            padding: 32px;
+            color: var(--foreground-muted);
             font-size: 14px;
-            line-height: 1.8;
+            line-height: 1.9;
             white-space: pre-wrap;
         }
 
         .report-meta {
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid #30363d;
-            color: #8b949e;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-subtle);
+            color: var(--foreground-subtle);
             font-size: 13px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .navbar-content {
+                padding: 12px 20px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero-section {
+                padding: 100px 20px 60px;
+            }
+
+            .headline-layer {
+                font-size: clamp(36px, 12vw, 72px);
+            }
+
+            .task-panel {
+                padding: 24px;
+            }
+
+            .workflow-section {
+                padding: 80px 20px;
+            }
+
+            .agents-flow {
+                grid-template-columns: 1fr;
+            }
+
+            .report-section {
+                padding: 24px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- 顶部导航栏 -->
-    <div class="navbar">
+    <!-- Floating navigation -->
+    <nav class="navbar">
         <div class="navbar-content">
-            <div class="logo">🚀 FlowPilot</div>
-            <div class="demo-badge">演示版 - 使用模拟数据</div>
+            <div class="logo">FlowPilot</div>
+            <ul class="nav-links">
+                <li><a href="#workflow">Workflow</a></li>
+                <li><a href="#capabilities">Capabilities</a></li>
+                <li><a href="#reports">Reports</a></li>
+            </ul>
+            <div class="demo-badge">DEMO MODE</div>
         </div>
-    </div>
+    </nav>
 
-    <div class="container">
-        <!-- 任务输入区域 -->
-        <div class="input-section">
-            <h2>📝 输入任务</h2>
-            <textarea id="taskInput" class="task-input" placeholder="请输入您的任务描述，例如：分析 2024 年人工智能发展趋势"></textarea>
-            <button id="startBtn" class="btn-start">开始执行</button>
-            <div id="warningText" class="warning-text">⚠️ 请输入任务描述</div>
-            <div class="info-text">💡 当前为演示版本，执行过程使用模拟数据，不会调用真实 AI 服务</div>
+    <!-- Hero section with cinematic typography -->
+    <section class="hero-section">
+        <div class="hero-canvas-container">
+            <canvas id="heroCanvas"></canvas>
         </div>
 
-        <!-- Agent 状态卡片 -->
-        <div class="agents-section">
-            <h2>🤖 Agent 状态</h2>
-            <div class="agents-grid">
-                <div class="agent-card" id="agent-planner">
+        <div class="hero-content">
+            <div class="hero-headline">
+                <div class="headline-layer base">LET AI THINK DEEPER</div>
+                <div class="headline-layer glow-1">LET AI THINK DEEPER</div>
+                <div class="headline-layer glow-2">LET AI THINK DEEPER</div>
+                <div class="headline-layer scan">LET AI THINK DEEPER</div>
+                <div class="headline-layer rgb-shift">LET AI THINK DEEPER</div>
+            </div>
+
+            <p class="hero-subtitle">从复杂问题出发，让多个智能 Agent 协同完成研究、分析与核验。</p>
+
+            <!-- Premium task input panel -->
+            <div class="task-panel">
+                <div class="task-label">Task Input</div>
+                <textarea
+                    id="taskInput"
+                    class="task-input"
+                    placeholder="描述你想研究的问题，让 FlowPilot 开始工作……"></textarea>
+                <div class="task-actions">
+                    <div class="task-hint">Ctrl+Enter to submit</div>
+                    <button id="startBtn" class="btn-start">Start Research</button>
+                </div>
+                <div id="warningText" class="warning-text">⚠️ Please enter a task description</div>
+                <div class="demo-note">
+                    💡 Demo mode: Simulated execution with mock data. Real AI integration coming soon.
+                </div>
+            </div>
+        </div>
+
+        <div class="scroll-indicator">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Workflow section -->
+    <section class="workflow-section" id="workflow">
+        <div class="workflow-container">
+            <h2 class="section-title">Multi-Agent Research Process</h2>
+
+            <!-- Agent visualization -->
+            <div class="agents-flow" id="agentsFlow">
+                <div class="agent-card" id="agent-planner" data-agent="planner">
                     <div class="agent-header">
-                        <div class="agent-name">Planner</div>
-                        <div class="agent-status status-idle">待机</div>
+                        <div class="agent-info">
+                            <div class="agent-name">
+                                <span class="agent-indicator"></span>
+                                Planner
+                            </div>
+                            <div class="agent-role">任务规划与分解</div>
+                        </div>
+                        <div class="agent-status status-idle">Idle</div>
                     </div>
-                    <div class="agent-description">负责任务规划和分解</div>
+                    <div class="agent-description">
+                        Analyzes complex questions and breaks them down into structured research tasks.
+                    </div>
                     <div class="agent-progress" id="planner-progress"></div>
                 </div>
 
-                <div class="agent-card" id="agent-researcher">
+                <div class="agent-card" id="agent-researcher" data-agent="researcher">
                     <div class="agent-header">
-                        <div class="agent-name">Researcher</div>
-                        <div class="agent-status status-idle">待机</div>
+                        <div class="agent-info">
+                            <div class="agent-name">
+                                <span class="agent-indicator"></span>
+                                Researcher
+                            </div>
+                            <div class="agent-role">信息检索与整理</div>
+                        </div>
+                        <div class="agent-status status-idle">Idle</div>
                     </div>
-                    <div class="agent-description">负责资料搜集和整理</div>
+                    <div class="agent-description">
+                        Gathers information from multiple sources and organizes relevant data.
+                    </div>
                     <div class="agent-progress" id="researcher-progress"></div>
                 </div>
 
-                <div class="agent-card" id="agent-analyst">
+                <div class="agent-card" id="agent-analyst" data-agent="analyst">
                     <div class="agent-header">
-                        <div class="agent-name">Analyst</div>
-                        <div class="agent-status status-idle">待机</div>
+                        <div class="agent-info">
+                            <div class="agent-name">
+                                <span class="agent-indicator"></span>
+                                Analyst
+                            </div>
+                            <div class="agent-role">信息分析与总结</div>
+                        </div>
+                        <div class="agent-status status-idle">Idle</div>
                     </div>
-                    <div class="agent-description">负责数据分析和总结</div>
+                    <div class="agent-description">
+                        Analyzes collected data, extracts insights, and synthesizes findings.
+                    </div>
                     <div class="agent-progress" id="analyst-progress"></div>
                 </div>
 
-                <div class="agent-card" id="agent-verifier">
+                <div class="agent-card" id="agent-verifier" data-agent="verifier">
                     <div class="agent-header">
-                        <div class="agent-name">Verifier</div>
-                        <div class="agent-status status-idle">待机</div>
+                        <div class="agent-info">
+                            <div class="agent-name">
+                                <span class="agent-indicator"></span>
+                                Verifier
+                            </div>
+                            <div class="agent-role">结果核验与质量把关</div>
+                        </div>
+                        <div class="agent-status status-idle">Idle</div>
                     </div>
-                    <div class="agent-description">负责结果核验和质量把关</div>
+                    <div class="agent-description">
+                        Validates findings, checks consistency, and ensures quality standards.
+                    </div>
                     <div class="agent-progress" id="verifier-progress"></div>
                 </div>
             </div>
-        </div>
 
-        <!-- 进度区域 -->
-        <div class="progress-section" id="progressSection">
-            <h2>⚡ 执行进度</h2>
-            <div class="progress-bar-container">
-                <div class="progress-bar" id="progressBar"></div>
+            <!-- Activity timeline -->
+            <div class="activity-timeline" id="activityTimeline">
+                <h3 class="activity-title">Live Activity</h3>
+                <div class="timeline-content" id="timelineContent"></div>
             </div>
-            <div class="current-step" id="currentStep">准备开始...</div>
-        </div>
 
-        <!-- 报告区域 -->
-        <div class="report-section" id="reportSection">
-            <h2>📊 最终报告</h2>
-            <div class="report-content" id="reportContent"></div>
-            <div class="report-meta" id="reportMeta"></div>
+            <!-- Progress section -->
+            <div class="progress-section" id="progressSection">
+                <h3 class="progress-title">Execution Progress</h3>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="current-step" id="currentStep">Ready to begin...</div>
+            </div>
+
+            <!-- Report section -->
+            <div class="report-section" id="reportSection">
+                <h2 class="report-title">Research Report</h2>
+                <div class="report-content" id="reportContent"></div>
+                <div class="report-meta" id="reportMeta"></div>
+            </div>
         </div>
-    </div>
+    </section>
 
     <script>
-        // 模拟数据和配置
+        // ==================== Canvas-based cursor interaction ====================
+        const canvas = document.getElementById('heroCanvas');
+        const ctx = canvas.getContext('2d');
+        let animationId;
+
+        function setupCanvas() {
+            const dpr = Math.min(window.devicePixelRatio, 2);
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            ctx.scale(dpr, dpr);
+        }
+
+        setupCanvas();
+        window.addEventListener('resize', setupCanvas);
+
+        // Cursor tracking
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let currentX = mouseX;
+        let currentY = mouseY;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            document.body.classList.add('cursor-active');
+        });
+
+        // Particle system for subtle visual depth
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.parentElement.clientWidth;
+                this.y = Math.random() * canvas.parentElement.clientHeight;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+                this.size = Math.random() * 2 + 0.5;
+                this.opacity = Math.random() * 0.3 + 0.1;
+            }
+
+            update(mx, my) {
+                const dx = mx - this.x;
+                const dy = my - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < 200) {
+                    const force = (200 - dist) / 200;
+                    this.vx += (dx / dist) * force * 0.05;
+                    this.vy += (dy / dist) * force * 0.05;
+                }
+
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vx *= 0.99;
+                this.vy *= 0.99;
+
+                if (this.x < 0 || this.x > canvas.parentElement.clientWidth ||
+                    this.y < 0 || this.y > canvas.parentElement.clientHeight) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(168, 166, 255, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        const particles = Array.from({ length: 40 }, () => new Particle());
+
+        function animate() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Smooth cursor interpolation
+            const dx = mouseX - currentX;
+            const dy = mouseY - currentY;
+            currentX += dx * 0.08;
+            currentY += dy * 0.08;
+
+            // Update CSS custom property for background glow
+            document.body.style.setProperty('--mouse-x', `${currentX}px`);
+            document.body.style.setProperty('--mouse-y', `${currentY}px`);
+
+            // Draw cursor influence field
+            const gradient = ctx.createRadialGradient(currentX, currentY, 0, currentX, currentY, 300);
+            gradient.addColorStop(0, 'rgba(168, 166, 255, 0.08)');
+            gradient.addColorStop(0.5, 'rgba(168, 166, 255, 0.02)');
+            gradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Update and draw particles
+            particles.forEach(p => {
+                p.update(currentX, currentY);
+                p.draw();
+            });
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Pause animation when page is hidden
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                cancelAnimationFrame(animationId);
+            } else {
+                animate();
+            }
+        });
+
+        // ==================== Task execution logic ====================
         const MOCK_WORKFLOW = [
             {
                 agent: 'planner',
-                step: '任务规划',
+                step: 'Task Planning',
                 duration: 2000,
                 progress: 25,
-                message: '正在分析任务需求，制定执行计划...'
+                message: 'Analyzing task requirements and structuring research plan...',
+                event: 'Planner: 已完成任务拆解'
             },
             {
                 agent: 'researcher',
-                step: '资料搜集',
+                step: 'Information Gathering',
                 duration: 3000,
                 progress: 50,
-                message: '正在搜集相关资料和数据源...'
+                message: 'Collecting relevant information and data sources...',
+                event: 'Researcher: 正在整理待检索的问题'
             },
             {
                 agent: 'analyst',
-                step: '数据分析',
+                step: 'Data Analysis',
                 duration: 2500,
                 progress: 75,
-                message: '正在分析数据，提取关键信息...'
+                message: 'Analyzing data and extracting key insights...',
+                event: 'Analyst: 正在分析收集的资料'
             },
             {
                 agent: 'verifier',
-                step: '结果核验',
+                step: 'Quality Verification',
                 duration: 2000,
                 progress: 100,
-                message: '正在核验分析结果，确保质量...'
+                message: 'Verifying results and ensuring quality standards...',
+                event: 'Verifier: 正在核验分析结果'
             }
         ];
 
-        // DOM 元素
+        // DOM elements
         const taskInput = document.getElementById('taskInput');
         const startBtn = document.getElementById('startBtn');
         const warningText = document.getElementById('warningText');
         const progressSection = document.getElementById('progressSection');
         const progressBar = document.getElementById('progressBar');
         const currentStep = document.getElementById('currentStep');
+        const activityTimeline = document.getElementById('activityTimeline');
+        const timelineContent = document.getElementById('timelineContent');
         const reportSection = document.getElementById('reportSection');
         const reportContent = document.getElementById('reportContent');
         const reportMeta = document.getElementById('reportMeta');
 
-        // 工作流状态
         let isRunning = false;
 
-        // 更新 Agent 状态
+        // Update agent status
         function updateAgentStatus(agentId, status, progress = '') {
             const card = document.getElementById(`agent-${agentId}`);
             const statusBadge = card.querySelector('.agent-status');
             const progressDiv = card.querySelector('.agent-progress');
 
-            // 移除所有状态类
             card.classList.remove('active', 'completed');
             statusBadge.classList.remove('status-idle', 'status-running', 'status-completed');
 
-            // 添加新状态
             if (status === 'running') {
                 card.classList.add('active');
                 statusBadge.classList.add('status-running');
-                statusBadge.textContent = '运行中';
+                statusBadge.textContent = 'Running';
             } else if (status === 'completed') {
                 card.classList.add('completed');
                 statusBadge.classList.add('status-completed');
-                statusBadge.textContent = '已完成';
+                statusBadge.textContent = 'Completed';
             } else {
                 statusBadge.classList.add('status-idle');
-                statusBadge.textContent = '待机';
+                statusBadge.textContent = 'Idle';
             }
 
             progressDiv.textContent = progress;
         }
 
-        // 执行工作流步骤
-        async function executeStep(stepConfig) {
+        // Add timeline event
+        function addTimelineEvent(event, index) {
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'timeline-event';
+            eventDiv.style.animationDelay = `${index * 0.1}s`;
+
+            const time = new Date().toLocaleTimeString('zh-CN', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            eventDiv.innerHTML = `
+                <div class="event-time">${time}</div>
+                <div class="event-text">${event}</div>
+            `;
+
+            timelineContent.appendChild(eventDiv);
+        }
+
+        // Execute workflow step
+        async function executeStep(stepConfig, index) {
             return new Promise((resolve) => {
-                // 更新当前步骤
                 currentStep.textContent = `🔄 ${stepConfig.step}: ${stepConfig.message}`;
                 progressBar.style.width = `${stepConfig.progress}%`;
 
-                // 更新 Agent 状态
                 updateAgentStatus(stepConfig.agent, 'running', stepConfig.message);
+                addTimelineEvent(stepConfig.event, index);
 
-                // 模拟执行时间
                 setTimeout(() => {
-                    updateAgentStatus(stepConfig.agent, 'completed', '✓ 执行完成');
+                    updateAgentStatus(stepConfig.agent, 'completed', '✓ Execution completed');
                     resolve();
                 }, stepConfig.duration);
             });
         }
 
-        // 生成模拟报告
+        // Generate mock report
         function generateMockReport(task) {
             const timestamp = new Date().toLocaleString('zh-CN');
             return {
-                content: `任务：${task}
+                content: `Task: ${task}
 
-【模拟分析结果】
+【Demo Analysis Results】
 
-一、任务分解（Planner）
-• 确定分析维度和关键问题
-• 规划资料搜集范围
-• 制定分析框架
+I. Task Breakdown (Planner)
+• Determined analysis dimensions and key questions
+• Planned information gathering scope
+• Established analysis framework
 
-二、资料整理（Researcher）
-• 模拟搜集了 15 份相关资料
-• 整理了 3 个主要数据源
-• 识别了 8 个关键趋势点
+II. Information Organization (Researcher)
+• Simulated collection of 15 relevant sources
+• Organized 3 primary data sources
+• Identified 8 key trend points
 
-三、深度分析（Analyst）
-• 对比了历史数据和当前趋势
-• 提取了核心观点和结论
-• 生成了可视化图表（模拟）
+III. Deep Analysis (Analyst)
+• Compared historical data with current trends
+• Extracted core insights and conclusions
+• Generated visualization charts (simulated)
 
-四、质量核验（Verifier）
-• 验证了数据来源的可靠性
-• 检查了逻辑一致性
-• 确认了结论的合理性
+IV. Quality Verification (Verifier)
+• Validated data source reliability
+• Checked logical consistency
+• Confirmed conclusion validity
 
-【总结】
-本次分析通过 FlowPilot 工作流完成，所有步骤均已验证。
+【Summary】
+This analysis was completed through the FlowPilot workflow with all steps verified.
 
-⚠️ 提醒：以上为演示数据，实际使用时会调用真实 AI 服务进行分析。`,
-                meta: `生成时间：${timestamp}\n执行耗时：${(MOCK_WORKFLOW.reduce((sum, step) => sum + step.duration, 0) / 1000).toFixed(1)} 秒\n使用 Agent：Planner, Researcher, Analyst, Verifier`
+⚠️ Reminder: The above is demonstration data. Real AI services will be integrated in production.`,
+                meta: `Generated: ${timestamp}\nExecution time: ${(MOCK_WORKFLOW.reduce((sum, step) => sum + step.duration, 0) / 1000).toFixed(1)}s\nAgents used: Planner, Researcher, Analyst, Verifier`
             };
         }
 
-        // 重置工作流状态
+        // Reset workflow
         function resetWorkflow() {
-            // 重置所有 Agent
             ['planner', 'researcher', 'analyst', 'verifier'].forEach(agentId => {
                 updateAgentStatus(agentId, 'idle', '');
             });
 
-            // 重置进度
             progressBar.style.width = '0%';
-            currentStep.textContent = '准备开始...';
-
-            // 隐藏报告
+            currentStep.textContent = 'Ready to begin...';
+            timelineContent.innerHTML = '';
             reportSection.classList.remove('visible');
         }
 
-        // 开始执行工作流
+        // Start workflow
         async function startWorkflow() {
             const task = taskInput.value.trim();
 
-            // 验证输入
             if (!task) {
                 warningText.style.display = 'block';
                 taskInput.focus();
@@ -517,21 +1314,20 @@
             warningText.style.display = 'none';
             isRunning = true;
             startBtn.disabled = true;
-            startBtn.textContent = '执行中...';
+            startBtn.textContent = 'Running...';
 
-            // 重置状态
             resetWorkflow();
-
-            // 显示进度区域
             progressSection.classList.add('visible');
+            activityTimeline.classList.add('visible');
 
-            // 执行所有步骤
-            for (const stepConfig of MOCK_WORKFLOW) {
-                await executeStep(stepConfig);
+            // Smooth scroll to workflow section
+            document.getElementById('workflow').scrollIntoView({ behavior: 'smooth' });
+
+            for (let i = 0; i < MOCK_WORKFLOW.length; i++) {
+                await executeStep(MOCK_WORKFLOW[i], i);
             }
 
-            // 生成报告
-            currentStep.textContent = '✅ 所有步骤已完成，正在生成报告...';
+            currentStep.textContent = '✅ All steps completed, generating report...';
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             const report = generateMockReport(task);
@@ -539,15 +1335,14 @@
             reportMeta.textContent = report.meta;
             reportSection.classList.add('visible');
 
-            currentStep.textContent = '✅ 任务执行完成！';
+            currentStep.textContent = '✅ Task execution complete!';
 
-            // 恢复按钮
             isRunning = false;
             startBtn.disabled = false;
-            startBtn.textContent = '重新执行';
+            startBtn.textContent = 'Restart Research';
         }
 
-        // 事件监听
+        // Event listeners
         startBtn.addEventListener('click', startWorkflow);
 
         taskInput.addEventListener('input', () => {
@@ -558,9 +1353,39 @@
 
         taskInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && e.ctrlKey && !isRunning) {
+                e.preventDefault();
                 startWorkflow();
             }
         });
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href');
+                document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Touch device support
+        if ('ontouchstart' in window) {
+            let touchX = window.innerWidth / 2;
+            let touchY = window.innerHeight / 2;
+
+            document.addEventListener('touchmove', (e) => {
+                if (e.touches.length > 0) {
+                    touchX = e.touches[0].clientX;
+                    touchY = e.touches[0].clientY;
+                    mouseX = touchX;
+                    mouseY = touchY;
+                }
+            });
+        }
+
+        // Reduced motion support
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            particles.length = 0;
+        }
     </script>
 </body>
 </html>
