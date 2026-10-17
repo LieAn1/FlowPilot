@@ -193,18 +193,19 @@
         }
 
         .hero-headline {
-            margin-bottom: 32px;
+            margin-bottom: 40px;
             font-family: 'Playfair Display', serif;
             font-style: italic;
-            font-size: clamp(48px, 9vw, 110px);
+            font-size: clamp(42px, 7vw, 88px);
             font-weight: 700;
             color: var(--foreground);
-            letter-spacing: -0.03em;
+            letter-spacing: -0.02em;
             line-height: 1.1;
             opacity: 0;
             filter: blur(20px);
             animation: blurRise 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
-            max-width: 95%;
+            white-space: nowrap;
+            overflow: visible;
         }
 
         @keyframes blurRise {
@@ -221,7 +222,7 @@
         .hero-subtitle {
             font-size: 16px;
             color: var(--foreground-subtle);
-            margin-bottom: 56px;
+            margin-bottom: 48px;
             font-weight: 400;
             letter-spacing: 0.01em;
             max-width: 600px;
@@ -700,7 +701,9 @@
             }
 
             .hero-headline {
-                font-size: clamp(32px, 8vw, 56px);
+                font-size: clamp(28px, 7vw, 48px);
+                white-space: normal;
+                word-wrap: break-word;
             }
 
             .task-panel {
