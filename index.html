@@ -194,35 +194,17 @@
 
         .hero-headline {
             margin-bottom: 32px;
-        }
-
-        .headline-line {
-            display: block;
-            line-height: 0.95;
-        }
-
-        .headline-line:first-child {
             font-family: 'Playfair Display', serif;
             font-style: italic;
-            font-size: clamp(60px, 11vw, 140px);
+            font-size: clamp(48px, 9vw, 110px);
             font-weight: 700;
             color: var(--foreground);
             letter-spacing: -0.03em;
+            line-height: 1.1;
             opacity: 0;
             filter: blur(20px);
             animation: blurRise 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
-        }
-
-        .headline-line:last-child {
-            font-family: 'Inter', sans-serif;
-            font-size: clamp(60px, 11vw, 140px);
-            font-weight: 800;
-            color: var(--foreground);
-            letter-spacing: -0.04em;
-            text-transform: lowercase;
-            opacity: 0;
-            filter: blur(20px);
-            animation: blurRise 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+            max-width: 95%;
         }
 
         @keyframes blurRise {
@@ -717,9 +699,8 @@
                 padding: 100px 20px 60px;
             }
 
-            .headline-line:first-child,
-            .headline-line:last-child {
-                font-size: clamp(40px, 12vw, 80px);
+            .hero-headline {
+                font-size: clamp(32px, 8vw, 56px);
             }
 
             .task-panel {
@@ -780,8 +761,7 @@
         <!-- Hero content -->
         <div class="hero-content">
             <h1 class="hero-headline">
-                <span class="headline-line">Complexity,</span>
-                <span class="headline-line">meet clarity.</span>
+                Complexity, meet clarity.
             </h1>
 
             <p class="hero-subtitle">
@@ -829,7 +809,7 @@
                             </div>
                             <div class="agent-role">任务规划与分解</div>
                         </div>
-                        <div class="agent-status status-idle">Idle</div>
+                        <div class="agent-status status-idle">待机</div>
                     </div>
                     <div class="agent-description">
                         Analyzes complex questions and breaks them down into structured research tasks.
@@ -846,7 +826,7 @@
                             </div>
                             <div class="agent-role">信息检索与整理</div>
                         </div>
-                        <div class="agent-status status-idle">Idle</div>
+                        <div class="agent-status status-idle">待机</div>
                     </div>
                     <div class="agent-description">
                         Gathers information from multiple sources and organizes relevant data.
@@ -863,7 +843,7 @@
                             </div>
                             <div class="agent-role">信息分析与总结</div>
                         </div>
-                        <div class="agent-status status-idle">Idle</div>
+                        <div class="agent-status status-idle">待机</div>
                     </div>
                     <div class="agent-description">
                         Analyzes collected data, extracts insights, and synthesizes findings.
@@ -880,7 +860,7 @@
                             </div>
                             <div class="agent-role">结果核验与质量把关</div>
                         </div>
-                        <div class="agent-status status-idle">Idle</div>
+                        <div class="agent-status status-idle">待机</div>
                     </div>
                     <div class="agent-description">
                         Validates findings, checks consistency, and ensures quality standards.
@@ -891,22 +871,22 @@
 
             <!-- Activity timeline -->
             <div class="activity-timeline" id="activityTimeline">
-                <h3 class="activity-title">Live Activity</h3>
+                <h3 class="activity-title">实时活动</h3>
                 <div class="timeline-content" id="timelineContent"></div>
             </div>
 
             <!-- Progress section -->
             <div class="progress-section" id="progressSection">
-                <h3 class="progress-title">Execution Progress</h3>
+                <h3 class="progress-title">执行进度</h3>
                 <div class="progress-bar-container">
                     <div class="progress-bar" id="progressBar"></div>
                 </div>
-                <div class="current-step" id="currentStep">Ready to begin...</div>
+                <div class="current-step" id="currentStep">准备开始...</div>
             </div>
 
             <!-- Report section -->
             <div class="report-section" id="reportSection">
-                <h2 class="report-title">Research Report</h2>
+                <h2 class="report-title">研究报告</h2>
                 <div class="report-content" id="reportContent"></div>
                 <div class="report-meta" id="reportMeta"></div>
             </div>
@@ -1001,34 +981,34 @@
         const MOCK_WORKFLOW = [
             {
                 agent: 'planner',
-                step: 'Task Planning',
+                step: '任务规划',
                 duration: 2000,
                 progress: 25,
-                message: 'Analyzing task requirements and structuring research plan...',
+                message: '正在分析任务需求，制定执行计划...',
                 event: 'Planner: 已完成任务拆解'
             },
             {
                 agent: 'researcher',
-                step: 'Information Gathering',
+                step: '信息检索',
                 duration: 3000,
                 progress: 50,
-                message: 'Collecting relevant information and data sources...',
+                message: '正在搜集相关资料和数据源...',
                 event: 'Researcher: 正在整理待检索的问题'
             },
             {
                 agent: 'analyst',
-                step: 'Data Analysis',
+                step: '数据分析',
                 duration: 2500,
                 progress: 75,
-                message: 'Analyzing data and extracting key insights...',
+                message: '正在分析数据，提取关键洞察...',
                 event: 'Analyst: 正在分析收集的资料'
             },
             {
                 agent: 'verifier',
-                step: 'Quality Verification',
+                step: '质量核验',
                 duration: 2000,
                 progress: 100,
-                message: 'Verifying results and ensuring quality standards...',
+                message: '正在验证结果，确保质量标准...',
                 event: 'Verifier: 正在核验分析结果'
             }
         ];
@@ -1058,14 +1038,14 @@
             if (status === 'running') {
                 card.classList.add('active');
                 statusBadge.classList.add('status-running');
-                statusBadge.textContent = 'Running';
+                statusBadge.textContent = '运行中';
             } else if (status === 'completed') {
                 card.classList.add('completed');
                 statusBadge.classList.add('status-completed');
-                statusBadge.textContent = 'Completed';
+                statusBadge.textContent = '已完成';
             } else {
                 statusBadge.classList.add('status-idle');
-                statusBadge.textContent = 'Idle';
+                statusBadge.textContent = '待机';
             }
 
             progressDiv.textContent = progress;
@@ -1108,35 +1088,35 @@
         function generateMockReport(task) {
             const timestamp = new Date().toLocaleString('zh-CN');
             return {
-                content: `Task: ${task}
+                content: `任务：${task}
 
-【Demo Analysis Results】
+【模拟分析结果】
 
-I. Task Breakdown (Planner)
-• Determined analysis dimensions and key questions
-• Planned information gathering scope
-• Established analysis framework
+一、任务分解（Planner）
+• 确定分析维度和关键问题
+• 规划资料搜集范围
+• 制定分析框架
 
-II. Information Organization (Researcher)
-• Simulated collection of 15 relevant sources
-• Organized 3 primary data sources
-• Identified 8 key trend points
+二、资料整理（Researcher）
+• 模拟搜集了 15 份相关资料
+• 整理了 3 个主要数据源
+• 识别了 8 个关键趋势点
 
-III. Deep Analysis (Analyst)
-• Compared historical data with current trends
-• Extracted core insights and conclusions
-• Generated visualization charts (simulated)
+三、深度分析（Analyst）
+• 对比了历史数据和当前趋势
+• 提取了核心观点和结论
+• 生成了可视化图表（模拟）
 
-IV. Quality Verification (Verifier)
-• Validated data source reliability
-• Checked logical consistency
-• Confirmed conclusion validity
+四、质量核验（Verifier）
+• 验证了数据来源的可靠性
+• 检查了逻辑一致性
+• 确认了结论的合理性
 
-【Summary】
-This analysis was completed through the FlowPilot workflow with all steps verified.
+【总结】
+本次分析通过 FlowPilot 工作流完成，所有步骤均已验证。
 
-⚠️ Reminder: The above is demonstration data. Real AI services will be integrated in production.`,
-                meta: `Generated: ${timestamp}\nExecution time: ${(MOCK_WORKFLOW.reduce((sum, step) => sum + step.duration, 0) / 1000).toFixed(1)}s\nAgents used: Planner, Researcher, Analyst, Verifier`
+⚠️ 提醒：以上为演示数据，实际使用时会调用真实 AI 服务进行分析。`,
+                meta: `生成时间：${timestamp}\n执行耗时：${(MOCK_WORKFLOW.reduce((sum, step) => sum + step.duration, 0) / 1000).toFixed(1)} 秒\n使用 Agent：Planner, Researcher, Analyst, Verifier`
             };
         }
 
@@ -1146,7 +1126,7 @@ This analysis was completed through the FlowPilot workflow with all steps verifi
             });
 
             progressBar.style.width = '0%';
-            currentStep.textContent = 'Ready to begin...';
+            currentStep.textContent = '准备开始...';
             timelineContent.innerHTML = '';
             reportSection.classList.remove('visible');
         }
@@ -1163,7 +1143,7 @@ This analysis was completed through the FlowPilot workflow with all steps verifi
             warningText.style.display = 'none';
             isRunning = true;
             startBtn.disabled = true;
-            startBtn.textContent = 'Running...';
+            startBtn.textContent = '执行中...';
 
             resetWorkflow();
             progressSection.classList.add('visible');
@@ -1175,7 +1155,7 @@ This analysis was completed through the FlowPilot workflow with all steps verifi
                 await executeStep(MOCK_WORKFLOW[i], i);
             }
 
-            currentStep.textContent = '✅ All steps completed, generating report...';
+            currentStep.textContent = '✅ 所有步骤已完成，正在生成报告...';
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             const report = generateMockReport(task);
@@ -1183,11 +1163,11 @@ This analysis was completed through the FlowPilot workflow with all steps verifi
             reportMeta.textContent = report.meta;
             reportSection.classList.add('visible');
 
-            currentStep.textContent = '✅ Task execution complete!';
+            currentStep.textContent = '✅ 任务执行完成！';
 
             isRunning = false;
             startBtn.disabled = false;
-            startBtn.textContent = 'Restart Research';
+            startBtn.textContent = '重新执行';
         }
 
         startBtn.addEventListener('click', startWorkflow);
