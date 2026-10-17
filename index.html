@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowPilot - AI 工作流工作台（演示版）</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 顶部导航栏 */
+        .navbar {
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 16px 0;
+            margin-bottom: 30px;
+        }
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #58a6ff;
+        }
+
+        .demo-badge {
+            background: #1f6feb;
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* 任务输入区域 */
+        .input-section {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+
+        .input-section h2 {
+            margin-bottom: 16px;
+            color: #f0f6fc;
+        }
+
+        .task-input {
+            width: 100%;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 12px;
+            color: #c9d1d9;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            margin-bottom: 16px;
+        }
+
+        .task-input:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+
+        .btn-start {
+            background: #238636;
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-start:hover:not(:disabled) {
+            background: #2ea043;
+        }
+
+        .btn-start:disabled {
+            background: #21262d;
+            color: #8b949e;
+            cursor: not-allowed;
+        }
+
+        .warning-text {
+            color: #f85149;
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .info-text {
+            color: #8b949e;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        /* Agent 状态卡片 */
+        .agents-section {
+            margin-bottom: 30px;
+        }
+
+        .agents-section h2 {
+            margin-bottom: 16px;
+            color: #f0f6fc;
+        }
+
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .agent-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            transition: border-color 0.3s;
+        }
+
+        .agent-card.active {
+            border-color: #58a6ff;
+        }
+
+        .agent-card.completed {
+            border-color: #3fb950;
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .agent-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: #f0f6fc;
+        }
+
+        .agent-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .status-idle {
+            background: #21262d;
+            color: #8b949e;
+        }
+
+        .status-running {
+            background: #1f6feb;
+            color: #fff;
+        }
+
+        .status-completed {
+            background: #238636;
+            color: #fff;
+        }
+
+        .agent-description {
+            color: #8b949e;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .agent-progress {
+            color: #58a6ff;
+            font-size: 13px;
+        }
+
+        /* 进度区域 */
+        .progress-section {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .progress-section.visible {
+            display: block;
+        }
+
+        .progress-section h2 {
+            margin-bottom: 16px;
+            color: #f0f6fc;
+        }
+
+        .progress-bar-container {
+            background: #0d1117;
+            border-radius: 6px;
+            height: 8px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #1f6feb 0%, #58a6ff 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .current-step {
+            color: #c9d1d9;
+            font-size: 14px;
+            padding: 12px;
+            background: #0d1117;
+            border-radius: 6px;
+            border-left: 3px solid #58a6ff;
+        }
+
+        /* 报告区域 */
+        .report-section {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 24px;
+            display: none;
+        }
+
+        .report-section.visible {
+            display: block;
+        }
+
+        .report-section h2 {
+            margin-bottom: 16px;
+            color: #f0f6fc;
+        }
+
+        .report-content {
+            background: #0d1117;
+            border-radius: 6px;
+            padding: 16px;
+            color: #c9d1d9;
+            font-size: 14px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .report-meta {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #30363d;
+            color: #8b949e;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+        <div class="navbar-content">
+            <div class="logo">🚀 FlowPilot</div>
+            <div class="demo-badge">演示版 - 使用模拟数据</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 任务输入区域 -->
+        <div class="input-section">
+            <h2>📝 输入任务</h2>
+            <textarea id="taskInput" class="task-input" placeholder="请输入您的任务描述，例如：分析 2024 年人工智能发展趋势"></textarea>
+            <button id="startBtn" class="btn-start">开始执行</button>
+            <div id="warningText" class="warning-text">⚠️ 请输入任务描述</div>
+            <div class="info-text">💡 当前为演示版本，执行过程使用模拟数据，不会调用真实 AI 服务</div>
+        </div>
+
+        <!-- Agent 状态卡片 -->
+        <div class="agents-section">
+            <h2>🤖 Agent 状态</h2>
+            <div class="agents-grid">
+                <div class="agent-card" id="agent-planner">
+                    <div class="agent-header">
+                        <div class="agent-name">Planner</div>
+                        <div class="agent-status status-idle">待机</div>
+                    </div>
+                    <div class="agent-description">负责任务规划和分解</div>
+                    <div class="agent-progress" id="planner-progress"></div>
+                </div>
+
+                <div class="agent-card" id="agent-researcher">
+                    <div class="agent-header">
+                        <div class="agent-name">Researcher</div>
+                        <div class="agent-status status-idle">待机</div>
+                    </div>
+                    <div class="agent-description">负责资料搜集和整理</div>
+                    <div class="agent-progress" id="researcher-progress"></div>
+                </div>
+
+                <div class="agent-card" id="agent-analyst">
+                    <div class="agent-header">
+                        <div class="agent-name">Analyst</div>
+                        <div class="agent-status status-idle">待机</div>
+                    </div>
+                    <div class="agent-description">负责数据分析和总结</div>
+                    <div class="agent-progress" id="analyst-progress"></div>
+                </div>
+
+                <div class="agent-card" id="agent-verifier">
+                    <div class="agent-header">
+                        <div class="agent-name">Verifier</div>
+                        <div class="agent-status status-idle">待机</div>
+                    </div>
+                    <div class="agent-description">负责结果核验和质量把关</div>
+                    <div class="agent-progress" id="verifier-progress"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 进度区域 -->
+        <div class="progress-section" id="progressSection">
+            <h2>⚡ 执行进度</h2>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="current-step" id="currentStep">准备开始...</div>
+        </div>
+
+        <!-- 报告区域 -->
+        <div class="report-section" id="reportSection">
+            <h2>📊 最终报告</h2>
+            <div class="report-content" id="reportContent"></div>
+            <div class="report-meta" id="reportMeta"></div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟数据和配置
+        const MOCK_WORKFLOW = [
+            {
+                agent: 'planner',
+                step: '任务规划',
+                duration: 2000,
+                progress: 25,
+                message: '正在分析任务需求，制定执行计划...'
+            },
+            {
+                agent: 'researcher',
+                step: '资料搜集',
+                duration: 3000,
+                progress: 50,
+                message: '正在搜集相关资料和数据源...'
+            },
+            {
+                agent: 'analyst',
+                step: '数据分析',
+                duration: 2500,
+                progress: 75,
+                message: '正在分析数据，提取关键信息...'
+            },
+            {
+                agent: 'verifier',
+                step: '结果核验',
+                duration: 2000,
+                progress: 100,
+                message: '正在核验分析结果，确保质量...'
+            }
+        ];
+
+        // DOM 元素
+        const taskInput = document.getElementById('taskInput');
+        const startBtn = document.getElementById('startBtn');
+        const warningText = document.getElementById('warningText');
+        const progressSection = document.getElementById('progressSection');
+        const progressBar = document.getElementById('progressBar');
+        const currentStep = document.getElementById('currentStep');
+        const reportSection = document.getElementById('reportSection');
+        const reportContent = document.getElementById('reportContent');
+        const reportMeta = document.getElementById('reportMeta');
+
+        // 工作流状态
+        let isRunning = false;
+
+        // 更新 Agent 状态
+        function updateAgentStatus(agentId, status, progress = '') {
+            const card = document.getElementById(`agent-${agentId}`);
+            const statusBadge = card.querySelector('.agent-status');
+            const progressDiv = card.querySelector('.agent-progress');
+
+            // 移除所有状态类
+            card.classList.remove('active', 'completed');
+            statusBadge.classList.remove('status-idle', 'status-running', 'status-completed');
+
+            // 添加新状态
+            if (status === 'running') {
+                card.classList.add('active');
+                statusBadge.classList.add('status-running');
+                statusBadge.textContent = '运行中';
+            } else if (status === 'completed') {
+                card.classList.add('completed');
+                statusBadge.classList.add('status-completed');
+                statusBadge.textContent = '已完成';
+            } else {
+                statusBadge.classList.add('status-idle');
+                statusBadge.textContent = '待机';
+            }
+
+            progressDiv.textContent = progress;
+        }
+
+        // 执行工作流步骤
+        async function executeStep(stepConfig) {
+            return new Promise((resolve) => {
+                // 更新当前步骤
+                currentStep.textContent = `🔄 ${stepConfig.step}: ${stepConfig.message}`;
+                progressBar.style.width = `${stepConfig.progress}%`;
+
+                // 更新 Agent 状态
+                updateAgentStatus(stepConfig.agent, 'running', stepConfig.message);
+
+                // 模拟执行时间
+                setTimeout(() => {
+                    updateAgentStatus(stepConfig.agent, 'completed', '✓ 执行完成');
+                    resolve();
+                }, stepConfig.duration);
+            });
+        }
+
+        // 生成模拟报告
+        function generateMockReport(task) {
+            const timestamp = new Date().toLocaleString('zh-CN');
+            return {
+                content: `任务：${task}
+
+【模拟分析结果】
+
+一、任务分解（Planner）
+• 确定分析维度和关键问题
+• 规划资料搜集范围
+• 制定分析框架
+
+二、资料整理（Researcher）
+• 模拟搜集了 15 份相关资料
+• 整理了 3 个主要数据源
+• 识别了 8 个关键趋势点
+
+三、深度分析（Analyst）
+• 对比了历史数据和当前趋势
+• 提取了核心观点和结论
+• 生成了可视化图表（模拟）
+
+四、质量核验（Verifier）
+• 验证了数据来源的可靠性
+• 检查了逻辑一致性
+• 确认了结论的合理性
+
+【总结】
+本次分析通过 FlowPilot 工作流完成，所有步骤均已验证。
+
+⚠️ 提醒：以上为演示数据，实际使用时会调用真实 AI 服务进行分析。`,
+                meta: `生成时间：${timestamp}\n执行耗时：${(MOCK_WORKFLOW.reduce((sum, step) => sum + step.duration, 0) / 1000).toFixed(1)} 秒\n使用 Agent：Planner, Researcher, Analyst, Verifier`
+            };
+        }
+
+        // 重置工作流状态
+        function resetWorkflow() {
+            // 重置所有 Agent
+            ['planner', 'researcher', 'analyst', 'verifier'].forEach(agentId => {
+                updateAgentStatus(agentId, 'idle', '');
+            });
+
+            // 重置进度
+            progressBar.style.width = '0%';
+            currentStep.textContent = '准备开始...';
+
+            // 隐藏报告
+            reportSection.classList.remove('visible');
+        }
+
+        // 开始执行工作流
+        async function startWorkflow() {
+            const task = taskInput.value.trim();
+
+            // 验证输入
+            if (!task) {
+                warningText.style.display = 'block';
+                taskInput.focus();
+                return;
+            }
+
+            warningText.style.display = 'none';
+            isRunning = true;
+            startBtn.disabled = true;
+            startBtn.textContent = '执行中...';
+
+            // 重置状态
+            resetWorkflow();
+
+            // 显示进度区域
+            progressSection.classList.add('visible');
+
+            // 执行所有步骤
+            for (const stepConfig of MOCK_WORKFLOW) {
+                await executeStep(stepConfig);
+            }
+
+            // 生成报告
+            currentStep.textContent = '✅ 所有步骤已完成，正在生成报告...';
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const report = generateMockReport(task);
+            reportContent.textContent = report.content;
+            reportMeta.textContent = report.meta;
+            reportSection.classList.add('visible');
+
+            currentStep.textContent = '✅ 任务执行完成！';
+
+            // 恢复按钮
+            isRunning = false;
+            startBtn.disabled = false;
+            startBtn.textContent = '重新执行';
+        }
+
+        // 事件监听
+        startBtn.addEventListener('click', startWorkflow);
+
+        taskInput.addEventListener('input', () => {
+            if (warningText.style.display === 'block') {
+                warningText.style.display = 'none';
+            }
+        });
+
+        taskInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey && !isRunning) {
+                startWorkflow();
+            }
+        });
+    </script>
+</body>
+</html>
