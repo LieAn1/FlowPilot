@@ -741,10 +741,10 @@
             </div>
             <div class="nav-center">
                 <ul class="nav-links">
-                    <li><a href="#workflow">Workspace</a></li>
+                    <li><a href="#hero">Workspace</a></li>
                     <li><a href="#workflow">Workflow</a></li>
-                    <li><a href="#workflow">Reports</a></li>
-                    <li><a href="#workflow">About</a></li>
+                    <li><a href="#reportSection">Reports</a></li>
+                    <li><a href="#about">About</a></li>
                 </ul>
             </div>
             <div class="navbar-right">
@@ -754,7 +754,7 @@
     </nav>
 
     <!-- Full-screen cinematic hero -->
-    <section class="hero-section">
+    <section class="hero-section" id="hero">
         <!-- Base background image -->
         <div class="hero-bg-base"></div>
 
@@ -980,41 +980,8 @@
             }
         });
 
-        // ==================== Task execution logic (preserved) ====================
-        const MOCK_WORKFLOW = [
-            {
-                agent: 'planner',
-                step: '任务规划',
-                duration: 2000,
-                progress: 25,
-                message: '正在分析任务需求，制定执行计划...',
-                event: 'Planner: 已完成任务拆解'
-            },
-            {
-                agent: 'researcher',
-                step: '信息检索',
-                duration: 3000,
-                progress: 50,
-                message: '正在搜集相关资料和数据源...',
-                event: 'Researcher: 正在整理待检索的问题'
-            },
-            {
-                agent: 'analyst',
-                step: '数据分析',
-                duration: 2500,
-                progress: 75,
-                message: '正在分析数据，提取关键洞察...',
-                event: 'Analyst: 正在分析收集的资料'
-            },
-            {
-                agent: 'verifier',
-                step: '质量核验',
-                duration: 2000,
-                progress: 100,
-                message: '正在验证结果，确保质量标准...',
-                event: 'Verifier: 正在核验分析结果'
-            }
-        ];
+        // ==================== Task execution logic ====================
+        const API_BASE = '/api';
 
         const taskInput = document.getElementById('taskInput');
         const startBtn = document.getElementById('startBtn');
@@ -1073,54 +1040,35 @@
             timelineContent.appendChild(eventDiv);
         }
 
-        async function executeStep(stepConfig, index) {
-            return new Promise((resolve) => {
-                currentStep.textContent = `🔄 ${stepConfig.step}: ${stepConfig.message}`;
-                progressBar.style.width = `${stepConfig.progress}%`;
-
-                updateAgentStatus(stepConfig.agent, 'running', stepConfig.message);
-                addTimelineEvent(stepConfig.event, index);
-
-                setTimeout(() => {
-                    updateAgentStatus(stepConfig.agent, 'completed', '✓ Execution completed');
-                    resolve();
-                }, stepConfig.duration);
-            });
+        function escapeHtml(text) {
+            const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
+            return text.replace(/[&<>"']/g, m => map[m]);
         }
 
-        function generateMockReport(task) {
-            const timestamp = new Date().toLocaleString('zh-CN');
-            return {
-                content: `任务：${task}
-
-【模拟分析结果】
-
-一、任务分解（Planner）
-• 确定分析维度和关键问题
-• 规划资料搜集范围
-• 制定分析框架
-
-二、资料整理（Researcher）
-• 模拟搜集了 15 份相关资料
-• 整理了 3 个主要数据源
-• 识别了 8 个关键趋势点
-
-三、深度分析（Analyst）
-• 对比了历史数据和当前趋势
-• 提取了核心观点和结论
-• 生成了可视化图表（模拟）
-
-四、质量核验（Verifier）
-• 验证了数据来源的可靠性
-• 检查了逻辑一致性
-• 确认了结论的合理性
-
-【总结】
-本次分析通过 FlowPilot 工作流完成，所有步骤均已验证。
-
-⚠️ 提醒：以上为演示数据，实际使用时会调用真实 AI 服务进行分析。`,
-                meta: `生成时间：${timestamp}\n执行耗时：${(MOCK_WORKFLOW.reduce((sum, step) => sum + step.duration, 0) / 1000).toFixed(1)} 秒\n使用 Agent：Planner, Researcher, Analyst, Verifier`
-            };
+        function renderReport(report) {
+            let html = '<h3>' + escapeHtml(report.task) + '</h3>';
+            if (report.stages) {
+                if (report.stages.planning) {
+                    html += '<h4>' + escapeHtml(report.stages.planning.name) + '</h4>';
+                    html += '<pre style="white-space:pre-wrap;word-break:break-word;">' + escapeHtml(report.stages.planning.content) + '</pre>';
+                }
+                if (report.stages.analysis) {
+                    html += '<h4>' + escapeHtml(report.stages.analysis.name) + '</h4>';
+                    html += '<pre style="white-space:pre-wrap;word-break:break-word;">' + escapeHtml(report.stages.analysis.content) + '</pre>';
+                }
+                if (report.stages.verification) {
+                    html += '<h4>' + escapeHtml(report.stages.verification.name) + '</h4>';
+                    html += '<pre style="white-space:pre-wrap;word-break:break-word;">' + escapeHtml(report.stages.verification.content) + '</pre>';
+                }
+            }
+            if (report.sources && report.sources.length > 0) {
+                html += '<h4>参考资料</h4><ul>';
+                report.sources.forEach(function(s) {
+                    html += '<li><a href="' + escapeHtml(s.url) + '" target="_blank">' + escapeHtml(s.title || s.url) + '</a></li>';
+                });
+                html += '</ul>';
+            }
+            return html;
         }
 
         function resetWorkflow() {
@@ -1154,19 +1102,89 @@
 
             document.getElementById('workflow').scrollIntoView({ behavior: 'smooth' });
 
-            for (let i = 0; i < MOCK_WORKFLOW.length; i++) {
-                await executeStep(MOCK_WORKFLOW[i], i);
+            try {
+                // Stage 1: Planner
+                updateAgentStatus('planner', 'running', '正在分析任务需求，制定执行计划...');
+                currentStep.textContent = '🔄 任务规划: 正在分析任务需求...';
+                progressBar.style.width = '15%';
+                addTimelineEvent('Planner: 开始制定研究计划', 0);
+                await new Promise(r => setTimeout(r, 800));
+                updateAgentStatus('planner', 'completed', '✓ 规划完成');
+                addTimelineEvent('Planner: 已完成任务拆解', 1);
+
+                // Stage 2: Researcher
+                updateAgentStatus('researcher', 'running', '正在搜集相关资料和数据源...');
+                currentStep.textContent = '🔄 信息检索: 正在搜集相关资料...';
+                progressBar.style.width = '30%';
+                addTimelineEvent('Researcher: 正在整理待检索的问题', 2);
+                await new Promise(r => setTimeout(r, 800));
+                updateAgentStatus('researcher', 'completed', '✓ 检索完成');
+                addTimelineEvent('Researcher: 资料搜集完成', 3);
+
+                // Stage 3: Call real API (Analyst work)
+                updateAgentStatus('analyst', 'running', '正在调用 AI 进行深度分析...');
+                currentStep.textContent = '🔄 深度分析: 正在调用 Ollama Cloud API...';
+                progressBar.style.width = '50%';
+                addTimelineEvent('Analyst: 正在调用 AI 模型进行分析', 4);
+
+                const response = await fetch(API_BASE + '/research', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ task: task, sourceUrls: [] })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.message || '请求失败: ' + response.status);
+                }
+
+                const data = await response.json();
+
+                if (data.status !== 'ok' || !data.report) {
+                    throw new Error(data.message || '返回数据格式异常');
+                }
+
+                updateAgentStatus('analyst', 'completed', '✓ 分析完成');
+                progressBar.style.width = '80%';
+                addTimelineEvent('Analyst: 深度分析完成', 5);
+
+                // Stage 4: Verifier
+                updateAgentStatus('verifier', 'running', '正在核验分析结果...');
+                currentStep.textContent = '🔄 质量核验: 正在验证分析结果...';
+                addTimelineEvent('Verifier: 正在核验分析结果', 6);
+                await new Promise(r => setTimeout(r, 500));
+                updateAgentStatus('verifier', 'completed', '✓ 核验完成');
+                progressBar.style.width = '100%';
+                addTimelineEvent('Verifier: 核验通过', 7);
+
+                // Render report
+                currentStep.textContent = '✅ 所有步骤已完成，正在生成报告...';
+                await new Promise(r => setTimeout(r, 500));
+
+                const report = data.report;
+                reportContent.innerHTML = renderReport(report);
+                const timestamp = new Date(report.timestamp).toLocaleString('zh-CN');
+                reportMeta.textContent = '生成时间：' + timestamp + '\n使用模型：' + (report.model || 'Ollama Cloud API');
+                reportSection.classList.add('visible');
+
+                currentStep.textContent = '✅ 任务执行完成！';
+
+                // Ensure all agents show completed
+                updateAgentStatus('planner', 'completed', '✓ 规划完成');
+                updateAgentStatus('researcher', 'completed', '✓ 检索完成');
+                updateAgentStatus('analyst', 'completed', '✓ 分析完成');
+                updateAgentStatus('verifier', 'completed', '✓ 核验完成');
+
+            } catch (err) {
+                currentStep.textContent = '⚠️ 错误: ' + err.message;
+                addTimelineEvent('错误: ' + err.message, 99);
+                ['planner', 'researcher', 'analyst', 'verifier'].forEach(function(id) {
+                    const card = document.getElementById('agent-' + id);
+                    if (card && card.classList.contains('active')) {
+                        updateAgentStatus(id, 'idle', '已中断');
+                    }
+                });
             }
-
-            currentStep.textContent = '✅ 所有步骤已完成，正在生成报告...';
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            const report = generateMockReport(task);
-            reportContent.textContent = report.content;
-            reportMeta.textContent = report.meta;
-            reportSection.classList.add('visible');
-
-            currentStep.textContent = '✅ 任务执行完成！';
 
             isRunning = false;
             startBtn.disabled = false;
@@ -1193,7 +1211,12 @@
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const targetId = link.getAttribute('href');
-                document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+                if (targetId === '#about') {
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                } else {
+                    const target = document.querySelector(targetId);
+                    if (target) target.scrollIntoView({ behavior: 'smooth' });
+                }
             });
         });
     </script>
