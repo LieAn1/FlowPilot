@@ -2,6 +2,8 @@
 
 多智能体协作的 AI 研究分析工作台。输入问题，由 Planner、Researcher、Analyst、Verifier 四个 Agent 协作完成研究规划、信息检索、深度分析和质量核验，最终生成结构化报告。
 
+![FlowPilot 界面预览](assets/webpage.png)
+
 ## 技术栈
 
 - 前端：原生 HTML / CSS / JavaScript（单文件）
